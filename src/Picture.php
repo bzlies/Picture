@@ -18,55 +18,46 @@ class Picture
         return 'Hello ' . $name;
     }
 
-    public static function makeDirs()
-    {
-
-    }
-
     public static function size($image)
     {
         return list($width, $height, $type, $attr) = getimagesize($image);
     }
 
-
-    public function _createPublicDir($path)
+    public static function createUploadDir($publicPath, $newDirName = "uploads")
     {
-        if (!file_exists($path))
-        {
-            Storage::makeDirectory($path);
-        }
+      $finalPath = $publicPath . DIRECTORY_SEPARATOR . $newDirName;
+      if (file_exists($finalPath)) {
+        return $finalPath;
+      }
+      dd($publicPath);
+      if (!file_exists($publicPath)) {
+        mkdir($publicPath);
+        mkdir($finalPath);
+        return $finalPath;
+      }
+      mkdir($finalPath);
+      return $finalPath;
     }
 
-    public static function createUploadDir($publicPath, $newDirName)
-    {
-        if (Storage::exists($publicPath)) {
-            Storage::makeDirectory(directory);
-        } else {
-            echo 'O diretório publico não existe';
-        }
 
-        if (Storage::exists($publicPath . '/' . $newDirName)) {
-            echo 'O diretório uploads existe';
-        } else {
-            echo 'O diretório uploads NAO existe';
-        }
 
-    }
-
-    public static function makePictureFromWidth($picture, $width, $path = '/', $maintainAspectRatio = false)
-    {
+    public static function makePictureFromWidth($picture, $width, $newFileName = null, $path = '/', $maintainAspectRatio = false)
+    { 
+      $finalPath = self::createUploadDir($path);
+      $image = Image::make($picture);
+      $extension = $picture->getClientOriginalExtension();
+      if ($maintainAspectRatio) {
+          $image->resize($width, null, function($constraint) {
+              $constraint->aspectRatio();
+          });
+      } else {
         $image = Image::make($picture);
-        if ($maintainAspectRatio) {
-            $image->resize($width, null, function($constraint) {
-                $constraint->aspectRatio();
-            });
-        } else {
-            $image = Image::make($picture);
-        }
-        $extension = $picture->extension();
-        $newImageName = time() . '.' . $extension;
-        $image->save($pathLarge . '/' . $newImageName);
-        return $pathLarge . '/' . $newImageName;
+      }
+      $newImageName = !is_null($newFileName) ? $newFileName : time();
+      $newImageName .= $newImageName . '.' . $extension;
+      $finalPath .= DIRECTORY_SEPARATOR . $newImageName;
+      $image->save($finalPath);
+      return $finalPath;
     }
 
 }
