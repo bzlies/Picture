@@ -13,37 +13,38 @@ class Picture
         // constructor body
     }
 
-    public static function sayHello($name)
-    {
-        return 'Hello ' . $name;
-    }
-
     public static function size($image)
     {
         return list($width, $height, $type, $attr) = getimagesize($image);
     }
 
-    public static function createUploadDir($publicPath, $newDirName = "uploads")
+    /**
+     * Creates all directories in the path given
+     * 
+     * @param  String $dirs  Slash separated path: netflix/strangerthings/eleven
+     * @return String        The result of the created path
+     */
+    public static function preparePath($dirs)
     {
-      $finalPath = $publicPath . DIRECTORY_SEPARATOR . $newDirName;
-      if (file_exists($finalPath)) {
-        return $finalPath;
+      $dirString = './';
+      $dirsArray = explode('/', $dirs);
+      foreach ($dirsArray as $dir) {
+        try {
+          $dirString .= $dir . '/';
+          if (!file_exists($dirString)) {
+            mkdir($dirString);
+          }
+        } catch (Exception $e) {
+          dd($e);
+        }
       }
-      dd($publicPath);
-      if (!file_exists($publicPath)) {
-        mkdir($publicPath);
-        mkdir($finalPath);
-        return $finalPath;
-      }
-      mkdir($finalPath);
-      return $finalPath;
+      return $dirString;
     }
-
 
 
     public static function makePictureFromWidth($picture, $width, $newFileName = null, $path = '/', $maintainAspectRatio = false)
     { 
-      $finalPath = self::createUploadDir($path);
+      $finalPath = self::preparePath($path);
       $image = Image::make($picture);
       $extension = $picture->getClientOriginalExtension();
       if ($maintainAspectRatio) {

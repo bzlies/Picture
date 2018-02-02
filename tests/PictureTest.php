@@ -7,9 +7,9 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 class PictureTest extends TestCase
 {
   public $picture = '.\tests\2721.jpg';
-  public $publicPath = '.\tests\public';
-  public $finalPath = '.\tests\public' . DIRECTORY_SEPARATOR . 'uploads';
-  public $finalPicturePath = '.\tests\public' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . '2721.jpg';
+  public $publicPath = '.\tests';
+  public $finalPath = '.\tests' . DIRECTORY_SEPARATOR . 'uploads';
+  public $finalPicturePath = '.\tests' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'picture.jpg';
   public $newName = 'picture';
   /**
    * Setup the test environment.
@@ -47,15 +47,32 @@ class PictureTest extends TestCase
   //   rmdir($this->publicPath, true);
   // }
 
-  public function test_moves_picture()
-  {
-    $picture = new UploadedFile($this->picture, $this->picture);
+  // public function test_moves_picture()
+  // {
+  //   $picture = new UploadedFile($this->picture, $this->picture);
 
-    $this->assertFileNotExists($this->finalPicturePath, 'The picture is not in its place');
-    Picture::makePictureFromWidth($picture, 300, $this->newName, $this->finalPath, true);
-    $this->assertFileExists($this->finalPicturePath, 'the picture exists!');
+  //   $this->assertFileNotExists($this->finalPicturePath, 'The picture is not in its place');
+  //   Picture::makePictureFromWidth($picture, 300, $this->newName, $this->finalPath, true);
+  //   $this->assertFileExists($this->finalPicturePath, 'the picture exists!');
+  // }
+  // 
+  public function test_create_whole_path()
+  {
+    $testPath = 'tests/uploads/netflix/garbage';
+    $test = Picture::preparePath($testPath);
+    $this->assertDirectoryExists('tests/uploads', 'Uploads existe');
+    $this->assertDirectoryExists('tests/uploads/netflix', 'netflix existe');
+    $this->assertDirectoryExists($testPath, '$testPath ' . $testPath , ' existe');
+    $this->assertContains($test, './' .$testPath, 'test ' . $test . ' e ' . $testPath);
+    $this->delTree('./tests/uploads');
   }
 
 
-
+  public function delTree($dir) { 
+   $files = array_diff(scandir($dir), array('.','..'));
+    foreach ($files as $file) { 
+      (is_dir("$dir/$file")) ? $this->delTree("$dir/$file") : unlink("$dir/$file"); 
+    } 
+    return rmdir($dir); 
+  } 
 }
