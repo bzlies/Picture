@@ -98,6 +98,7 @@ class Picture
                   '/' .
                   $options['name'] . '.' . $extension;
     $image->save($finalPath);
+    return $finalPath;
   }
 
 }
